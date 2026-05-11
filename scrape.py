@@ -1,74 +1,29 @@
 """
-JioTag review scraper.
+JioTag review scraper (weekly run).
 
-Pulls new reviews from Google Play, Apple App Store, and YouTube, dedupes
-against a Google Sheet, runs each new review through Gemini for sentiment +
-topic tagging, appends results to the sheet, and writes a downloadable .xlsx
-snapshot.
+Scrapes Google Play, Apple App Store, and YouTube. Dedupes against the Google
+Sheet. Appends new reviews to the sheet with sentiment/topics LEFT BLANK —
+tagging happens separately in tag.py running daily.
 
-Designed to run on GitHub Actions on a weekly schedule.
+This script is fast (~5 min) because it does no LLM calls. Designed to run on
+GitHub Actions weekly.
 """
 
-import hashlib
-import json
 import os
-import sys
 import time
 from datetime import datetime, timezone
 
-import gspread
 import requests
-from google.oauth2.service_account import Credentials
 
-# --- Configuration -----------------------------------------------------------
-
-# Apps to scrape. Update these IDs if Jio renames or relaunches the app.
-PLAY_STORE_APP_ID = "com.jio.consumer.jiothings"   # JioThings on Play Store
-APP_STORE_APP_ID = "1549371816"                     # JioThings on App Store (numeric ID)
-APP_STORE_COUNTRY = "in"
-
-# YouTube search queries — finds review videos, then pulls their comments.
-YOUTUBE_QUERIES = ["JioTag review", "JioTag Air review", "JioTag Go review"]
-YOUTUBE_MAX_VIDEOS_PER_QUERY = 5
-YOUTUBE_MAX_COMMENTS_PER_VIDEO = 100
-
-# Sheet name inside the Google Sheet.
-SHEET_TAB = "reviews"
-
-# Columns in the order they appear in the sheet.
-COLUMNS = [
-    "review_id", "source", "product_variant", "product_url",
-    "review_date", "scrape_date", "rating", "review_title", "review_text",
-    "reviewer_name", "verified_purchase", "helpful_votes",
-    "app_version", "device_info", "language", "media_attached",
-    "sentiment", "sentiment_confidence", "topics", "competitor_mention",
-    "response_from_seller",
-]
-
-# Topics the LLM will tag against. Constrained list = consistent analytics later.
-TOPIC_TAGS = [
-    "battery", "accuracy", "range", "app_connectivity", "find_my_device",
-    "price", "build_quality", "customer_service", "setup", "community_find",
-    "compatibility", "other",
-]
-
-# --- Helpers -----------------------------------------------------------------
-
-def now_iso():
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
-
-def make_id(source: str, native_id: str) -> str:
-    """Stable unique ID per review across runs, used for dedup."""
-    h = hashlib.sha1(f"{source}:{native_id}".encode()).hexdigest()[:16]
-    return f"{source}_{h}"
-
-def log(msg: str):
-    print(f"[{now_iso()}] {msg}", flush=True)
+from common import (
+    APP_STORE_APP_ID, APP_STORE_COUNTRY, COLUMNS, PLAY_STORE_APP_ID,
+    YOUTUBE_MAX_COMMENTS_PER_VIDEO, YOUTUBE_MAX_VIDEOS_PER_QUERY, YOUTUBE_QUERIES,
+    append_reviews, existing_ids, fetch_all_rows, get_sheet, log, make_id, now_iso,
+)
 
 # --- Scrapers ----------------------------------------------------------------
 
 def scrape_play_store():
-    """Pull recent reviews of JioThings from Google Play."""
     from google_play_scraper import Sort, reviews
     log("Scraping Play Store...")
     out = []
@@ -106,11 +61,9 @@ def scrape_play_store():
     return out
 
 def scrape_app_store():
-    """Pull recent reviews from Apple App Store via the public RSS feed."""
     log("Scraping App Store...")
     out = []
     try:
-        # Apple's public review RSS — no API key needed, max ~500 reviews across 10 pages.
         for page in range(1, 6):
             url = (f"https://itunes.apple.com/{APP_STORE_COUNTRY}/rss/customerreviews/"
                    f"page={page}/id={APP_STORE_APP_ID}/sortby=mostrecent/json")
@@ -119,7 +72,6 @@ def scrape_app_store():
                 break
             data = resp.json()
             entries = data.get("feed", {}).get("entry", [])
-            # First entry is app metadata, skip it on page 1.
             if page == 1 and entries and "im:name" in entries[0]:
                 entries = entries[1:]
             if not entries:
@@ -154,15 +106,11 @@ def scrape_app_store():
     return out
 
 def scrape_youtube():
-    """Find JioTag review videos and pull their comments."""
     from youtube_comment_downloader import YoutubeCommentDownloader
+    import yt_dlp
     log("Scraping YouTube...")
     out = []
     try:
-        # We use YouTube's search via the comment-downloader's helper if available,
-        # otherwise just use a static list of search-result URLs from a quick web search.
-        # For reliability, we use yt-dlp's flat-search to get video IDs without API key.
-        import yt_dlp
         downloader = YoutubeCommentDownloader()
         ydl_opts = {"quiet": True, "extract_flat": True, "skip_download": True}
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -205,118 +153,14 @@ def scrape_youtube():
         log(f"  YouTube error: {e}")
     return out
 
-# --- Sentiment & topic tagging via Gemini ------------------------------------
-
-def tag_with_llm(review_text: str) -> dict:
-    """Send a review to Gemini and get back sentiment + topic tags.
-    Retries on 429 rate-limit errors with exponential backoff."""
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key or not review_text.strip():
-        return {"sentiment": "", "sentiment_confidence": "",
-                "topics": "", "competitor_mention": ""}
-
-    prompt = f"""Classify this product review of JioTag (a Bluetooth item tracker similar to Apple AirTag, made by Reliance Jio in India).
-
-Review: \"\"\"{review_text[:2000]}\"\"\"
-
-Respond with ONLY a JSON object, no prose, no markdown:
-{{
-  "sentiment": "positive" | "neutral" | "negative",
-  "sentiment_confidence": 0.0-1.0,
-  "topics": [list of applicable tags from: {TOPIC_TAGS}],
-  "competitor_mention": true | false (true if AirTag, Tile, SmartTag, or other competitor is named)
-}}"""
-
-    model = "gemini-2.5-flash-lite"
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
-    body = {
-        "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {
-            "temperature": 0.1,
-            "maxOutputTokens": 300,
-            "responseMimeType": "application/json",
-        },
-    }
-    headers = {"x-goog-api-key": api_key, "Content-Type": "application/json"}
-
-    # Retry up to 4 times on 429 / 503; exponential backoff.
-    backoff = 8
-    for attempt in range(4):
-        try:
-            resp = requests.post(url, headers=headers, json=body, timeout=30)
-            if resp.status_code in (429, 503):
-                log(f"  Gemini {resp.status_code} on attempt {attempt + 1}, backing off {backoff}s")
-                time.sleep(backoff)
-                backoff *= 2
-                continue
-            resp.raise_for_status()
-            data = resp.json()
-            text = data["candidates"][0]["content"]["parts"][0]["text"].strip()
-            if text.startswith("```"):
-                text = text.split("```")[1]
-                if text.startswith("json"):
-                    text = text[4:]
-            parsed = json.loads(text.strip())
-            return {
-                "sentiment": parsed.get("sentiment", ""),
-                "sentiment_confidence": parsed.get("sentiment_confidence", ""),
-                "topics": ",".join(parsed.get("topics", [])),
-                "competitor_mention": "yes" if parsed.get("competitor_mention") else "no",
-            }
-        except Exception as e:
-            log(f"  Gemini tagging error (attempt {attempt + 1}): {e}")
-            if attempt < 3:
-                time.sleep(backoff)
-                backoff *= 2
-            continue
-
-    return {"sentiment": "", "sentiment_confidence": "",
-            "topics": "", "competitor_mention": ""}
-
-# --- Google Sheets I/O -------------------------------------------------------
-
-def get_sheet():
-    creds_json = os.environ["GOOGLE_CREDS_JSON"]
-    sheet_id = os.environ["GOOGLE_SHEET_ID"]
-    creds = Credentials.from_service_account_info(
-        json.loads(creds_json),
-        scopes=["https://www.googleapis.com/auth/spreadsheets"],
-    )
-    gc = gspread.authorize(creds)
-    sh = gc.open_by_key(sheet_id)
-    try:
-        ws = sh.worksheet(SHEET_TAB)
-    except gspread.WorksheetNotFound:
-        ws = sh.add_worksheet(title=SHEET_TAB, rows=1, cols=len(COLUMNS))
-        ws.append_row(COLUMNS)
-    # Ensure header row is correct.
-    header = ws.row_values(1)
-    if header != COLUMNS:
-        ws.update("A1", [COLUMNS])
-    return ws
-
-def existing_ids(ws):
-    """Return the set of review_ids already in the sheet (column A)."""
-    col = ws.col_values(1)
-    return set(col[1:])  # skip header
-
-def append_reviews(ws, rows):
-    if not rows:
-        return
-    values = [[r.get(c, "") for c in COLUMNS] for r in rows]
-    ws.append_rows(values, value_input_option="RAW")
-
 # --- xlsx export -------------------------------------------------------------
 
-def write_xlsx(new_rows, all_rows_from_sheet, path: str):
-    """Write a 3-sheet xlsx: Summary, New This Run, All Reviews."""
+def write_xlsx(new_rows, all_rows, path: str):
     from openpyxl import Workbook
     from openpyxl.styles import Font, PatternFill, Alignment
     from openpyxl.utils import get_column_letter
 
     wb = Workbook()
-
-    # --- Sheet 1: Summary ---
     ws = wb.active
     ws.title = "Summary"
 
@@ -324,11 +168,14 @@ def write_xlsx(new_rows, all_rows_from_sheet, path: str):
     by_source = {}
     by_sentiment = {"positive": 0, "neutral": 0, "negative": 0, "": 0}
     topic_counts = {}
+    untagged = 0
     negative_examples = []
     for r in new_rows:
         by_source[r["source"]] = by_source.get(r["source"], 0) + 1
         s = r.get("sentiment", "") or ""
         by_sentiment[s] = by_sentiment.get(s, 0) + 1
+        if not s:
+            untagged += 1
         for t in (r.get("topics", "") or "").split(","):
             t = t.strip()
             if t:
@@ -353,7 +200,12 @@ def write_xlsx(new_rows, all_rows_from_sheet, path: str):
     ws["A3"] = f"New reviews this run: {n}"
     ws["A3"].font = bold
 
-    row = 5
+    if untagged > 0:
+        ws["A4"] = (f"Note: {untagged} reviews not yet tagged. Sentiment/topics "
+                    f"will be filled in by the daily tagger over the next few days.")
+        ws["A4"].font = Font(italic=True, size=10, color="888888")
+
+    row = 6
     ws.cell(row=row, column=1, value="By source").font = bold
     row += 1
     for k, v in by_source.items():
@@ -362,9 +214,9 @@ def write_xlsx(new_rows, all_rows_from_sheet, path: str):
         row += 1
 
     row += 1
-    ws.cell(row=row, column=1, value="Sentiment").font = bold
+    ws.cell(row=row, column=1, value="Sentiment (of tagged reviews)").font = bold
     row += 1
-    for label, key in [("Positive", "positive"), ("Neutral", "neutral"), ("Negative", "negative")]:
+    for label, key in [("Positive", "positive"), ("Neutral", "neutral"), ("Negative", "negative"), ("Not yet tagged", "")]:
         ws.cell(row=row, column=1, value=label)
         ws.cell(row=row, column=2, value=by_sentiment.get(key, 0))
         row += 1
@@ -391,11 +243,10 @@ def write_xlsx(new_rows, all_rows_from_sheet, path: str):
             ws.cell(row=row, column=3, value=ex["text"]).alignment = Alignment(wrap_text=True)
             row += 1
 
-    ws.column_dimensions["A"].width = 20
+    ws.column_dimensions["A"].width = 30
     ws.column_dimensions["B"].width = 30
     ws.column_dimensions["C"].width = 80
 
-    # --- Sheet 2: New This Run ---
     ws2 = wb.create_sheet("New This Run")
     ws2.append(COLUMNS)
     for cell in ws2[1]:
@@ -405,13 +256,12 @@ def write_xlsx(new_rows, all_rows_from_sheet, path: str):
         ws2.append([r.get(c, "") for c in COLUMNS])
     _autosize(ws2)
 
-    # --- Sheet 3: All Reviews (full history) ---
     ws3 = wb.create_sheet("All Reviews")
     ws3.append(COLUMNS)
     for cell in ws3[1]:
         cell.font = bold
         cell.fill = header_fill
-    for r in all_rows_from_sheet:
+    for r in all_rows:
         ws3.append([r.get(c, "") for c in COLUMNS])
     _autosize(ws3)
 
@@ -419,7 +269,6 @@ def write_xlsx(new_rows, all_rows_from_sheet, path: str):
     log(f"xlsx written: {path}")
 
 def _autosize(ws):
-    """Set sensible column widths based on header names."""
     from openpyxl.utils import get_column_letter
     widths = {
         "review_id": 18, "source": 12, "product_variant": 18,
@@ -432,11 +281,6 @@ def _autosize(ws):
     }
     for i, col_name in enumerate(COLUMNS, start=1):
         ws.column_dimensions[get_column_letter(i)].width = widths.get(col_name, 15)
-
-def fetch_all_rows_from_sheet(ws):
-    """Return all rows in the sheet as list of dicts (for inclusion in the xlsx)."""
-    records = ws.get_all_records()
-    return records
 
 # --- Main --------------------------------------------------------------------
 
@@ -454,23 +298,17 @@ def main():
     new_rows = [r for r in all_scraped if r["review_id"] not in seen]
     log(f"Total scraped: {len(all_scraped)} | New: {len(new_rows)}")
 
-    # Tag with Gemini. Skip if no API key (graceful degradation).
-    if os.environ.get("GEMINI_API_KEY"):
-        log("Tagging new reviews with Gemini...")
-        for i, r in enumerate(new_rows, 1):
-            tags = tag_with_llm(r["review_text"])
-            r.update(tags)
-            if i % 10 == 0:
-                log(f"  Tagged {i}/{len(new_rows)}")
-            time.sleep(5)  # 12 req/min, well under Gemini Flash-Lite's 15 RPM free limit
-    else:
-        log("Skipping LLM tagging (no GEMINI_API_KEY)")
+    # Leave tagging columns blank — tag.py fills them in over the week.
+    for r in new_rows:
+        r.setdefault("sentiment", "")
+        r.setdefault("sentiment_confidence", "")
+        r.setdefault("topics", "")
+        r.setdefault("competitor_mention", "")
 
     append_reviews(ws, new_rows)
     log(f"Appended {len(new_rows)} rows to sheet")
 
-    # Write a complete xlsx snapshot — uploaded as a GitHub Actions artifact.
-    all_rows = fetch_all_rows_from_sheet(ws)
+    all_rows = fetch_all_rows(ws)
     date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     xlsx_path = f"jiotag_reviews_{date_str}.xlsx"
     write_xlsx(new_rows, all_rows, xlsx_path)
