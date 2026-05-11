@@ -23,8 +23,8 @@ from google.oauth2.service_account import Credentials
 # --- Configuration -----------------------------------------------------------
 
 # Apps to scrape. Update these IDs if Jio renames or relaunches the app.
-PLAY_STORE_APP_ID = "com.jio.jiotag"          # JioThings on Play Store
-APP_STORE_APP_ID = "1597756894"                # JioThings on App Store (numeric ID)
+PLAY_STORE_APP_ID = "com.jio.consumer.jiothings"   # JioThings on Play Store
+APP_STORE_APP_ID = "1549371816"                     # JioThings on App Store (numeric ID)
 APP_STORE_COUNTRY = "in"
 
 # YouTube search queries — finds review videos, then pulls their comments.
@@ -208,7 +208,8 @@ def scrape_youtube():
 # --- Sentiment & topic tagging via Gemini ------------------------------------
 
 def tag_with_llm(review_text: str) -> dict:
-    """Send a review to Gemini and get back sentiment + topic tags."""
+    """Send a review to Gemini and get back sentiment + topic tags.
+    Retries on 429 rate-limit errors with exponential backoff."""
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key or not review_text.strip():
         return {"sentiment": "", "sentiment_confidence": "",
@@ -228,43 +229,49 @@ Respond with ONLY a JSON object, no prose, no markdown:
 
     model = "gemini-2.5-flash-lite"
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+    body = {
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {
+            "temperature": 0.1,
+            "maxOutputTokens": 300,
+            "responseMimeType": "application/json",
+        },
+    }
+    headers = {"x-goog-api-key": api_key, "Content-Type": "application/json"}
 
-    try:
-        resp = requests.post(
-            url,
-            headers={
-                "x-goog-api-key": api_key,
-                "Content-Type": "application/json",
-            },
-            json={
-                "contents": [{"parts": [{"text": prompt}]}],
-                "generationConfig": {
-                    "temperature": 0.1,
-                    "maxOutputTokens": 300,
-                    "responseMimeType": "application/json",
-                },
-            },
-            timeout=30,
-        )
-        resp.raise_for_status()
-        data = resp.json()
-        text = data["candidates"][0]["content"]["parts"][0]["text"].strip()
-        # Strip markdown fences in case the model adds them despite responseMimeType
-        if text.startswith("```"):
-            text = text.split("```")[1]
-            if text.startswith("json"):
-                text = text[4:]
-        parsed = json.loads(text.strip())
-        return {
-            "sentiment": parsed.get("sentiment", ""),
-            "sentiment_confidence": parsed.get("sentiment_confidence", ""),
-            "topics": ",".join(parsed.get("topics", [])),
-            "competitor_mention": "yes" if parsed.get("competitor_mention") else "no",
-        }
-    except Exception as e:
-        log(f"  Gemini tagging error: {e}")
-        return {"sentiment": "", "sentiment_confidence": "",
-                "topics": "", "competitor_mention": ""}
+    # Retry up to 4 times on 429 / 503; exponential backoff.
+    backoff = 8
+    for attempt in range(4):
+        try:
+            resp = requests.post(url, headers=headers, json=body, timeout=30)
+            if resp.status_code in (429, 503):
+                log(f"  Gemini {resp.status_code} on attempt {attempt + 1}, backing off {backoff}s")
+                time.sleep(backoff)
+                backoff *= 2
+                continue
+            resp.raise_for_status()
+            data = resp.json()
+            text = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+            if text.startswith("```"):
+                text = text.split("```")[1]
+                if text.startswith("json"):
+                    text = text[4:]
+            parsed = json.loads(text.strip())
+            return {
+                "sentiment": parsed.get("sentiment", ""),
+                "sentiment_confidence": parsed.get("sentiment_confidence", ""),
+                "topics": ",".join(parsed.get("topics", [])),
+                "competitor_mention": "yes" if parsed.get("competitor_mention") else "no",
+            }
+        except Exception as e:
+            log(f"  Gemini tagging error (attempt {attempt + 1}): {e}")
+            if attempt < 3:
+                time.sleep(backoff)
+                backoff *= 2
+            continue
+
+    return {"sentiment": "", "sentiment_confidence": "",
+            "topics": "", "competitor_mention": ""}
 
 # --- Google Sheets I/O -------------------------------------------------------
 
@@ -455,7 +462,7 @@ def main():
             r.update(tags)
             if i % 10 == 0:
                 log(f"  Tagged {i}/{len(new_rows)}")
-            time.sleep(4.5)  # ~13 req/min, under Gemini Flash-Lite's 15 RPM free limit
+            time.sleep(5)  # 12 req/min, well under Gemini Flash-Lite's 15 RPM free limit
     else:
         log("Skipping LLM tagging (no GEMINI_API_KEY)")
 
