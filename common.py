@@ -38,7 +38,7 @@ TOPIC_TAGS = [
 ]
 
 # Tag.py settings — tuned for Gemini free tier (15 req/min, 1000 req/day)
-TAG_BATCH_SIZE = 150              # max rows to tag per daily run
+TAG_BATCH_SIZE = 100              # max rows to tag per daily run (~10 min total)
 TAG_DELAY_SECONDS = 5             # 12 req/min, safely under 15/min limit
 TAG_MIN_TEXT_LENGTH = 15          # skip Gemini for short noise like "Nope" / "Hi sir"
 
