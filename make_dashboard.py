@@ -222,7 +222,7 @@ def render_dashboard(ws, agg):
     # Push the grid in one update call.
     last_row = 37 + len(agg["negatives"]) + 1
     end_a1 = rowcol_to_a1(last_row, 12)
-    ws.update(f"A1:{end_a1}", grid[:last_row])
+    ws.update(range_name=f"A1:{end_a1}", values=grid[:last_row])
     log(f"Wrote {last_row} rows of data to Dashboard tab")
 
     return {
@@ -235,6 +235,10 @@ def render_dashboard(ws, agg):
 
 def apply_formatting(ws):
     """Apply visual formatting: bold headers, font sizes, colors."""
+    # Use a wildcard field mask — the API accepts this and applies whatever fields
+    # are present in userEnteredFormat without us having to enumerate them precisely.
+    fmt_mask = "userEnteredFormat(textFormat,backgroundColor,horizontalAlignment)"
+
     formats = [
         # Title
         {"range": "A1", "format": {
@@ -299,7 +303,7 @@ def apply_formatting(ws):
         "repeatCell": {
             "range": _a1_to_grid_range(ws, f["range"]),
             "cell": {"userEnteredFormat": f["format"]},
-            "fields": _fields_from_format(f["format"]),
+            "fields": fmt_mask,
         }
     } for f in formats]
 
@@ -311,14 +315,6 @@ def apply_formatting(ws):
             "fields": "pixelSize",
         }
     })
-    requests.append({
-        "updateDimensionProperties": {
-            "range": {"sheetId": ws.id, "dimension": "COLUMNS", "startIndex": 3, "endIndex": 4},
-            "properties": {"pixelSize": 180},
-            "fields": "pixelSize",
-        }
-    })
-    # Make "Review text" column wide
     requests.append({
         "updateDimensionProperties": {
             "range": {"sheetId": ws.id, "dimension": "COLUMNS", "startIndex": 3, "endIndex": 4},
@@ -358,24 +354,6 @@ def _a1_to_grid_range(ws, a1):
         "startColumnIndex": start_col,
         "endColumnIndex": end_col + 1,
     }
-
-
-def _fields_from_format(fmt):
-    """Build the 'fields' mask for a userEnteredFormat update."""
-    parts = []
-    if "textFormat" in fmt:
-        sub = []
-        tf = fmt["textFormat"]
-        for k in ("fontSize", "bold", "italic", "foregroundColor"):
-            if k in tf:
-                sub.append(f"textFormat.{k}")
-        parts.extend(sub)
-    if "backgroundColor" in fmt:
-        parts.append("backgroundColor")
-    if "horizontalAlignment" in fmt:
-        parts.append("horizontalAlignment")
-    return "userEnteredFormat(" + ",".join(p.split(".", 1)[1] if "." in p else p for p in parts) + ")" \
-           if parts else "userEnteredFormat"
 
 
 def add_charts(ws, ranges):
