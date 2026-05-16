@@ -360,9 +360,50 @@ def add_charts(ws, ranges):
     """Create the 4 charts on the dashboard."""
     sheet_id = ws.id
 
-    def chart_spec(chart_type, title, source_range, anchor_row, anchor_col):
-        """Build an addChart request."""
-        rng = _a1_to_grid_range(ws, f"{source_range[0]}:{source_range[1]}")
+    def _source(a1_range, col_offset=0, col_width=1):
+        """Build a sourceRange dict for a slice of the data range."""
+        rng = _a1_to_grid_range(ws, f"{a1_range[0]}:{a1_range[1]}")
+        return {"sources": [{
+            "sheetId": sheet_id,
+            "startRowIndex": rng["startRowIndex"],
+            "endRowIndex": rng["endRowIndex"],
+            "startColumnIndex": rng["startColumnIndex"] + col_offset,
+            "endColumnIndex": rng["startColumnIndex"] + col_offset + col_width,
+        }]}
+
+    def _position(anchor_row, anchor_col):
+        return {
+            "overlayPosition": {
+                "anchorCell": {
+                    "sheetId": sheet_id,
+                    "rowIndex": anchor_row,
+                    "columnIndex": anchor_col,
+                },
+                "widthPixels": 480,
+                "heightPixels": 300,
+            }
+        }
+
+    def pie_chart(title, data_range, anchor_row, anchor_col):
+        """Pie chart uses its own pieChart spec, not basicChart."""
+        return {
+            "addChart": {
+                "chart": {
+                    "spec": {
+                        "title": title,
+                        "pieChart": {
+                            "legendPosition": "RIGHT_LEGEND",
+                            "domain": {"sourceRange": _source(data_range, col_offset=0, col_width=1)},
+                            "series": {"sourceRange": _source(data_range, col_offset=1, col_width=1)},
+                        }
+                    },
+                    "position": _position(anchor_row, anchor_col),
+                }
+            }
+        }
+
+    def basic_chart(chart_type, title, data_range, anchor_row, anchor_col):
+        """Column / line / bar chart using basicChart spec."""
         return {
             "addChart": {
                 "chart": {
@@ -370,58 +411,31 @@ def add_charts(ws, ranges):
                         "title": title,
                         "basicChart": {
                             "chartType": chart_type,
-                            "legendPosition": "RIGHT_LEGEND" if chart_type == "PIE" else "BOTTOM_LEGEND",
-                            "axis": ([
+                            "legendPosition": "BOTTOM_LEGEND",
+                            "axis": [
                                 {"position": "BOTTOM_AXIS"},
                                 {"position": "LEFT_AXIS"},
-                            ] if chart_type != "PIE" else []),
+                            ],
                             "domains": [{
-                                "domain": {
-                                    "sourceRange": {"sources": [{
-                                        "sheetId": sheet_id,
-                                        "startRowIndex": rng["startRowIndex"],
-                                        "endRowIndex": rng["endRowIndex"],
-                                        "startColumnIndex": rng["startColumnIndex"],
-                                        "endColumnIndex": rng["startColumnIndex"] + 1,
-                                    }]}
-                                }
+                                "domain": {"sourceRange": _source(data_range, col_offset=0, col_width=1)}
                             }],
                             "series": [{
-                                "series": {
-                                    "sourceRange": {"sources": [{
-                                        "sheetId": sheet_id,
-                                        "startRowIndex": rng["startRowIndex"],
-                                        "endRowIndex": rng["endRowIndex"],
-                                        "startColumnIndex": rng["startColumnIndex"] + 1,
-                                        "endColumnIndex": rng["startColumnIndex"] + 2,
-                                    }]}
-                                },
+                                "series": {"sourceRange": _source(data_range, col_offset=1, col_width=1)},
                                 "targetAxis": "LEFT_AXIS",
                             }],
                             "headerCount": 1,
                         }
                     },
-                    "position": {
-                        "overlayPosition": {
-                            "anchorCell": {
-                                "sheetId": sheet_id,
-                                "rowIndex": anchor_row,
-                                "columnIndex": anchor_col,
-                            },
-                            "widthPixels": 480,
-                            "heightPixels": 300,
-                        }
-                    }
+                    "position": _position(anchor_row, anchor_col),
                 }
             }
         }
 
-    # Use PIE for sentiment, COLUMN for the others
     requests = [
-        chart_spec("PIE", "Sentiment Breakdown", ranges["sentiment_range"], 8, 6),
-        chart_spec("COLUMN", "Reviews by Source", ranges["source_range"], 8, 11),
-        chart_spec("COLUMN", "Top Topics", ranges["topics_range"], 19, 6),
-        chart_spec("LINE", "Weekly Review Volume", ranges["weekly_range"], 19, 11),
+        pie_chart("Sentiment Breakdown", ranges["sentiment_range"], 8, 6),
+        basic_chart("COLUMN", "Reviews by Source", ranges["source_range"], 8, 11),
+        basic_chart("COLUMN", "Top Topics", ranges["topics_range"], 19, 6),
+        basic_chart("LINE", "Weekly Review Volume", ranges["weekly_range"], 19, 11),
     ]
 
     ws.spreadsheet.batch_update({"requests": requests})
