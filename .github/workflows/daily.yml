@@ -30,3 +30,10 @@ jobs:
           GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: python tag.py
+
+      - name: Build dashboard
+        if: always()
+        env:
+          GOOGLE_CREDS_JSON: ${{ secrets.GOOGLE_CREDS_JSON }}
+          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+        run: python make_dashboard.py
