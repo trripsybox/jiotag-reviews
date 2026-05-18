@@ -53,11 +53,15 @@ def compute_aggregates(rows):
 
     # Topic counts (each row can have multiple comma-separated topics)
     topic_counts = Counter()
+    # Topic × sentiment matrix — for the stacked bar chart.
+    topic_by_sentiment = defaultdict(lambda: Counter())
     for r in tagged:
+        sent = str(r.get("sentiment", "")).strip().lower()
         for t in str(r.get("topics", "")).split(","):
             t = t.strip()
             if t:
                 topic_counts[t] += 1
+                topic_by_sentiment[t][sent] += 1
 
     # Reviews per ISO week (last 12 weeks)
     weekly = defaultdict(int)
@@ -89,6 +93,25 @@ def compute_aggregates(rows):
     negatives.sort(key=lambda x: x["date"], reverse=True)
     negatives = negatives[:15]
 
+    # Competitor mention details — collect topics and sentiments of competitor-mentioning reviews.
+    competitor_reviews = []
+    competitor_topic_counts = Counter()
+    competitor_sentiment = Counter()
+    for r in rows:
+        if str(r.get("competitor_mention", "")).strip().lower() == "yes":
+            text = str(r.get("review_text", ""))
+            competitor_reviews.append({
+                "source": str(r.get("source", "")),
+                "sentiment": str(r.get("sentiment", "")),
+                "topics": str(r.get("topics", "")),
+                "text": text[:500],
+            })
+            competitor_sentiment[str(r.get("sentiment", "")).strip()] += 1
+            for t in str(r.get("topics", "")).split(","):
+                t = t.strip()
+                if t:
+                    competitor_topic_counts[t] += 1
+
     # Top topic
     top_topic = topic_counts.most_common(1)
     top_topic_label = top_topic[0][0] if top_topic else "—"
@@ -109,6 +132,10 @@ def compute_aggregates(rows):
         "sentiment_counts": sentiment_counts,
         "source_counts": source_counts,
         "topic_counts": topic_counts,
+        "topic_by_sentiment": dict(topic_by_sentiment),
+        "competitor_reviews": competitor_reviews,
+        "competitor_topic_counts": competitor_topic_counts,
+        "competitor_sentiment": competitor_sentiment,
         "weekly": dict(sorted(weekly.items())),
         "negatives": negatives,
     }
