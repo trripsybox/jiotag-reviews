@@ -7,6 +7,9 @@ on:
     - cron: '0 3 * * *'
   workflow_dispatch:
 
+permissions:
+  contents: write   # needed so the action can commit docs/index.html back
+
 jobs:
   tag:
     runs-on: ubuntu-latest
@@ -37,3 +40,27 @@ jobs:
           GOOGLE_CREDS_JSON: ${{ secrets.GOOGLE_CREDS_JSON }}
           GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
         run: python make_dashboard.py
+
+      - name: Build public site
+        if: always()
+        env:
+          GOOGLE_CREDS_JSON: ${{ secrets.GOOGLE_CREDS_JSON }}
+          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+        run: python make_site.py
+
+      - name: Commit and push docs/index.html
+        if: always()
+        run: |
+          if [[ -f docs/index.html ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add docs/index.html
+            if git diff --staged --quiet; then
+              echo "No changes to docs/index.html"
+            else
+              git commit -m "Refresh dashboard $(date -u +'%Y-%m-%d %H:%M UTC')"
+              git push
+            fi
+          else
+            echo "docs/index.html not generated, skipping commit"
+          fi
