@@ -1,0 +1,31 @@
+{
+  "items": [
+    {
+      "title": "Improve app_connectivity",
+      "rationale": "78% of users experienced issues with app connectivity, which is the most frequently mentioned topic.",
+      "priority": "high"
+    },
+    {
+      "title": "Enhance setup process",
+      "rationale": "73% of users had issues with setup, which is the second most frequently mentioned topic.",
+      "priority": "high"
+    },
+    {
+      "title": "Address customer service concerns",
+      "rationale": "31% of users had negative experiences with customer service, which is a significant concern.",
+      "priority": "high"
+    },
+    {
+      "title": "Optimize battery life",
+      "rationale": "7% of users experienced battery-related issues, which is a common pain point.",
+      "priority": "medium"
+    },
+    {
+      "title": "Improve accuracy",
+      "rationale": "39% of users experienced issues with accuracy, which is a significant concern despite some positive feedback.",
+      "priority": "medium"
+    }
+  ],
+  "week": "2026-W21",
+  "generated_at_ist": "18 May 2026, 16:18 IST"
+}

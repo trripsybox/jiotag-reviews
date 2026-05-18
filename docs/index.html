@@ -10,6 +10,29 @@
 <style>
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
   .kpi-num { font-feature-settings: "tnum"; }
+  .info-tooltip { position: relative; display: inline-block; }
+  .info-tooltip .tooltip-text {
+    visibility: hidden; opacity: 0; transition: opacity 0.2s;
+    position: absolute; z-index: 10;
+    bottom: 125%; left: 50%; transform: translateX(-50%);
+    width: 280px; background: #1e293b; color: #fff;
+    text-align: left; padding: 10px 12px; border-radius: 6px;
+    font-size: 12px; line-height: 1.4; font-weight: normal;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .info-tooltip:hover .tooltip-text { visibility: visible; opacity: 1; }
+  .info-tooltip .tooltip-text::after {
+    content: ""; position: absolute; top: 100%; left: 50%; margin-left: -5px;
+    border-width: 5px; border-style: solid;
+    border-color: #1e293b transparent transparent transparent;
+  }
+  .info-icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: #cbd5e1; color: #475569;
+    font-size: 11px; font-weight: bold; cursor: help;
+    margin-left: 6px;
+  }
 </style>
 </head>
 <body class="bg-slate-50 text-slate-800">
@@ -20,7 +43,7 @@
   <header class="mb-10">
     <div class="flex items-baseline justify-between flex-wrap gap-2">
       <h1 class="text-4xl font-bold text-slate-900">JioTag Review Dashboard</h1>
-      <span class="text-sm text-slate-500">Last refreshed: 18 May 2026, 09:34 UTC</span>
+      <span class="text-sm text-slate-500">Last refreshed: 18 May 2026, 16:18 IST</span>
     </div>
     <p class="mt-2 text-slate-600">
       Automated analysis of 381 customer reviews from Google Play, Apple App Store, and YouTube.
@@ -35,7 +58,18 @@
       <div class="kpi-num text-3xl font-bold text-slate-900">381</div>
     </div>
     <div class="bg-white rounded-lg shadow-sm p-5 border border-slate-200">
-      <div class="text-xs uppercase tracking-wider text-slate-500 mb-1">Tagged</div>
+      <div class="text-xs uppercase tracking-wider text-slate-500 mb-1 flex items-center">
+        Tagged
+        <span class="info-tooltip">
+          <span class="info-icon">i</span>
+          <span class="tooltip-text">
+            <strong>Why "tagged"?</strong><br>
+            Reviews are scraped <b>weekly</b> on Monday from Play Store, App Store, and YouTube.
+            Sentiment + topic tagging happens <b>daily</b> in the background to spread the LLM workload across the week
+            and stay within free-tier API limits. So "Tagged" = reviews already classified, vs. just scraped.
+          </span>
+        </span>
+      </div>
       <div class="kpi-num text-3xl font-bold text-slate-900">381</div>
     </div>
     <div class="bg-white rounded-lg shadow-sm p-5 border border-slate-200">
@@ -56,21 +90,90 @@
     </div>
   </section>
 
-  <!-- Sentiment & Source -->
-  <section class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-    <div class="bg-white rounded-lg shadow-sm p-6 border border-slate-200">
-      <h2 class="text-lg font-semibold text-slate-900 mb-4">Sentiment breakdown</h2>
-      <div class="relative h-80"><canvas id="sentimentChart"></canvas></div>
+  <!-- Action items (NEW — top placement because they're the most actionable thing) -->
+  <section class="bg-white rounded-lg shadow-sm p-6 border border-slate-200 mb-6">
+    <div class="flex items-center justify-between mb-1 flex-wrap gap-2">
+      <h2 class="text-lg font-semibold text-slate-900">Top 5 action items</h2>
+      <span class="text-xs text-slate-400 italic">AI-generated · refreshed weekly · review before acting</span>
     </div>
+    <p class="text-sm text-slate-500 mb-4">
+      <span class="font-semibold text-slate-700">Week of May 18 – 24, 2026</span>
+      <span class="text-slate-400"> · 2026-W21</span>
+    </p>
+    
+            <div class="bg-rose-50 border border-rose-200 rounded-lg p-4 mb-3 flex items-start gap-4">
+              <div class="text-2xl font-bold text-slate-300 leading-none">1</div>
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1">
+                  <h3 class="font-semibold text-slate-900">Improve app_connectivity</h3>
+                  <span class="text-xs uppercase tracking-wider px-2 py-0.5 rounded bg-rose-100 text-rose-700 font-medium">high</span>
+                </div>
+                <p class="text-sm text-slate-600">78% of users experienced issues with app connectivity, which is the most frequently mentioned topic.</p>
+              </div>
+            </div>
+            
+            <div class="bg-rose-50 border border-rose-200 rounded-lg p-4 mb-3 flex items-start gap-4">
+              <div class="text-2xl font-bold text-slate-300 leading-none">2</div>
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1">
+                  <h3 class="font-semibold text-slate-900">Enhance setup process</h3>
+                  <span class="text-xs uppercase tracking-wider px-2 py-0.5 rounded bg-rose-100 text-rose-700 font-medium">high</span>
+                </div>
+                <p class="text-sm text-slate-600">73% of users had issues with setup, which is the second most frequently mentioned topic.</p>
+              </div>
+            </div>
+            
+            <div class="bg-rose-50 border border-rose-200 rounded-lg p-4 mb-3 flex items-start gap-4">
+              <div class="text-2xl font-bold text-slate-300 leading-none">3</div>
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1">
+                  <h3 class="font-semibold text-slate-900">Address customer service concerns</h3>
+                  <span class="text-xs uppercase tracking-wider px-2 py-0.5 rounded bg-rose-100 text-rose-700 font-medium">high</span>
+                </div>
+                <p class="text-sm text-slate-600">31% of users had negative experiences with customer service, which is a significant concern.</p>
+              </div>
+            </div>
+            
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-3 flex items-start gap-4">
+              <div class="text-2xl font-bold text-slate-300 leading-none">4</div>
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1">
+                  <h3 class="font-semibold text-slate-900">Optimize battery life</h3>
+                  <span class="text-xs uppercase tracking-wider px-2 py-0.5 rounded bg-amber-100 text-amber-700 font-medium">medium</span>
+                </div>
+                <p class="text-sm text-slate-600">7% of users experienced battery-related issues, which is a common pain point.</p>
+              </div>
+            </div>
+            
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-3 flex items-start gap-4">
+              <div class="text-2xl font-bold text-slate-300 leading-none">5</div>
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1">
+                  <h3 class="font-semibold text-slate-900">Improve accuracy</h3>
+                  <span class="text-xs uppercase tracking-wider px-2 py-0.5 rounded bg-amber-100 text-amber-700 font-medium">medium</span>
+                </div>
+                <p class="text-sm text-slate-600">39% of users experienced issues with accuracy, which is a significant concern despite some positive feedback.</p>
+              </div>
+            </div>
+            
+  </section>
+
+  <!-- Reviews by source (LEFT) and Sentiment breakdown (RIGHT) — swapped order -->
+  <section class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
     <div class="bg-white rounded-lg shadow-sm p-6 border border-slate-200">
       <h2 class="text-lg font-semibold text-slate-900 mb-4">Reviews by source</h2>
       <div class="relative h-80"><canvas id="sourceChart"></canvas></div>
     </div>
+    <div class="bg-white rounded-lg shadow-sm p-6 border border-slate-200">
+      <h2 class="text-lg font-semibold text-slate-900 mb-4">Sentiment breakdown</h2>
+      <div class="relative h-80"><canvas id="sentimentChart"></canvas></div>
+    </div>
   </section>
 
-  <!-- Top topics -->
+  <!-- Top topics — stacked by sentiment -->
   <section class="bg-white rounded-lg shadow-sm p-6 border border-slate-200 mb-6">
-    <h2 class="text-lg font-semibold text-slate-900 mb-4">Top topics</h2>
+    <h2 class="text-lg font-semibold text-slate-900 mb-1">Top topics</h2>
+    <p class="text-sm text-slate-500 mb-4">Each bar shows how many reviews mention the topic, broken down by sentiment.</p>
     <div class="relative h-96"><canvas id="topicsChart"></canvas></div>
   </section>
 
@@ -80,20 +183,82 @@
     <div class="relative h-96"><canvas id="weeklyChart"></canvas></div>
   </section>
 
-  <!-- Negative themes -->
+  <!-- Competitor mentions — refined with themes + topic breakdown -->
   <section class="bg-white rounded-lg shadow-sm p-6 border border-slate-200 mb-6">
-    <h2 class="text-lg font-semibold text-slate-900 mb-4">Recent complaint themes</h2>
-    <p class="text-sm text-slate-500 mb-4">Topics most commonly raised in recent negative reviews.</p>
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-      <div class="bg-rose-50 border border-rose-200 rounded-md px-4 py-3"><div class="text-sm text-rose-900 font-medium">app_connectivity</div><div class="text-xs text-rose-600 mt-1">11 mentions</div></div><div class="bg-rose-50 border border-rose-200 rounded-md px-4 py-3"><div class="text-sm text-rose-900 font-medium">setup</div><div class="text-xs text-rose-600 mt-1">6 mentions</div></div><div class="bg-rose-50 border border-rose-200 rounded-md px-4 py-3"><div class="text-sm text-rose-900 font-medium">find_my_device</div><div class="text-xs text-rose-600 mt-1">2 mentions</div></div><div class="bg-rose-50 border border-rose-200 rounded-md px-4 py-3"><div class="text-sm text-rose-900 font-medium">accuracy</div><div class="text-xs text-rose-600 mt-1">2 mentions</div></div><div class="bg-rose-50 border border-rose-200 rounded-md px-4 py-3"><div class="text-sm text-rose-900 font-medium">other</div><div class="text-xs text-rose-600 mt-1">2 mentions</div></div><div class="bg-rose-50 border border-rose-200 rounded-md px-4 py-3"><div class="text-sm text-rose-900 font-medium">range</div><div class="text-xs text-rose-600 mt-1">1 mentions</div></div><div class="bg-rose-50 border border-rose-200 rounded-md px-4 py-3"><div class="text-sm text-rose-900 font-medium">compatibility</div><div class="text-xs text-rose-600 mt-1">1 mentions</div></div><div class="bg-rose-50 border border-rose-200 rounded-md px-4 py-3"><div class="text-sm text-rose-900 font-medium">customer_service</div><div class="text-xs text-rose-600 mt-1">1 mentions</div></div>
+    <div class="flex items-center justify-between mb-1">
+      <h2 class="text-lg font-semibold text-slate-900">Competitor mentions</h2>
+      <span class="text-xs text-slate-400 italic">AI-summarized · no raw quotes</span>
     </div>
-  </section>
+    <p class="text-sm text-slate-500 mb-4">
+      <span class="font-semibold text-amber-700 text-base">12</span>
+      reviews mention competing products. Themes paraphrased below.
+    </p>
 
-  <!-- Competitor mentions -->
-  <section class="bg-white rounded-lg shadow-sm p-6 border border-slate-200 mb-6">
-    <h2 class="text-lg font-semibold text-slate-900 mb-2">Competitor mentions</h2>
-    <p class="text-3xl font-bold text-amber-600 kpi-num">12</p>
-    <p class="text-sm text-slate-500 mt-1">Reviews that mention AirTag, Tile, SmartTag, or other competing trackers.</p>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <h3 class="text-sm font-semibold text-slate-700 mb-3 uppercase tracking-wider">Discussion themes</h3>
+        <ul class="space-y-3">
+            <li class="flex items-start gap-3">
+              <span class="inline-block bg-amber-100 text-amber-800 text-xs font-medium px-2 py-0.5 rounded mt-0.5 shrink-0">AirTag</span>
+              <span class="text-sm text-slate-700">AirTag has better range than JioTag — users say AirTag works further from the phone.</span>
+            </li>
+            
+            <li class="flex items-start gap-3">
+              <span class="inline-block bg-amber-100 text-amber-800 text-xs font-medium px-2 py-0.5 rounded mt-0.5 shrink-0">AirTag</span>
+              <span class="text-sm text-slate-700">AirTag is better suited for users in the Apple ecosystem — users recommend it for those already invested in Apple products.</span>
+            </li>
+            
+            <li class="flex items-start gap-3">
+              <span class="inline-block bg-amber-100 text-amber-800 text-xs font-medium px-2 py-0.5 rounded mt-0.5 shrink-0">Samsung SmartTag</span>
+              <span class="text-sm text-slate-700">Samsung SmartTag is not as effective as AirTag — users mention AirTag as a better option.</span>
+            </li>
+            
+            <li class="flex items-start gap-3">
+              <span class="inline-block bg-amber-100 text-amber-800 text-xs font-medium px-2 py-0.5 rounded mt-0.5 shrink-0">Competitors (general)</span>
+              <span class="text-sm text-slate-700">JioTag is cheaper than AirTag and Samsung SmartTag — users mention price as a deciding factor in switching to JioTag.</span>
+            </li>
+            
+            <li class="flex items-start gap-3">
+              <span class="inline-block bg-amber-100 text-amber-800 text-xs font-medium px-2 py-0.5 rounded mt-0.5 shrink-0">Competitors (general)</span>
+              <span class="text-sm text-slate-700">JioTag has a shorter battery life than AirTag and Samsung SmartTag — users complain about the short battery life of JioTag.</span>
+            </li>
+            </ul>
+      </div>
+      <div>
+        <h3 class="text-sm font-semibold text-slate-700 mb-3 uppercase tracking-wider">Topics raised alongside competitors</h3>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-2 mt-4">
+            <div class="bg-amber-50 border border-amber-200 rounded px-3 py-2">
+              <div class="text-sm font-medium text-amber-900">compatibility</div>
+              <div class="text-xs text-amber-700">9 reviews</div>
+            </div>
+            
+            <div class="bg-amber-50 border border-amber-200 rounded px-3 py-2">
+              <div class="text-sm font-medium text-amber-900">other</div>
+              <div class="text-xs text-amber-700">4 reviews</div>
+            </div>
+            
+            <div class="bg-amber-50 border border-amber-200 rounded px-3 py-2">
+              <div class="text-sm font-medium text-amber-900">app_connectivity</div>
+              <div class="text-xs text-amber-700">3 reviews</div>
+            </div>
+            
+            <div class="bg-amber-50 border border-amber-200 rounded px-3 py-2">
+              <div class="text-sm font-medium text-amber-900">price</div>
+              <div class="text-xs text-amber-700">3 reviews</div>
+            </div>
+            
+            <div class="bg-amber-50 border border-amber-200 rounded px-3 py-2">
+              <div class="text-sm font-medium text-amber-900">find_my_device</div>
+              <div class="text-xs text-amber-700">3 reviews</div>
+            </div>
+            
+            <div class="bg-amber-50 border border-amber-200 rounded px-3 py-2">
+              <div class="text-sm font-medium text-amber-900">setup</div>
+              <div class="text-xs text-amber-700">3 reviews</div>
+            </div>
+            </div>
+      </div>
+    </div>
   </section>
 
   <footer class="text-center text-xs text-slate-400 pt-8 pb-4">
@@ -103,15 +268,10 @@
 </div>
 
 <script>
-// Register the datalabels plugin globally so we can use it per-chart.
 Chart.register(ChartDataLabels);
-
-// Default: don't show datalabels unless a chart explicitly opts in.
 Chart.defaults.set('plugins.datalabels', { display: false });
 
-const palette = ['#10b981', '#94a3b8', '#ef4444', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16', '#f97316'];
-
-// --- Sentiment doughnut: show percentage on each slice ---
+// --- Sentiment doughnut ---
 const sentimentTotal = 381;
 new Chart(document.getElementById('sentimentChart'), {
   type: 'doughnut',
@@ -125,19 +285,12 @@ new Chart(document.getElementById('sentimentChart'), {
     }]
   },
   options: {
-    responsive: true,
-    maintainAspectRatio: false,
+    responsive: true, maintainAspectRatio: false,
     plugins: {
       legend: { position: 'right', labels: { font: { size: 13 }, padding: 12 } },
       datalabels: {
-        display: true,
-        color: '#ffffff',
-        font: { weight: 'bold', size: 14 },
-        formatter: (value) => {
-          if (sentimentTotal === 0) return '';
-          const pct = (value / sentimentTotal * 100).toFixed(1);
-          return pct + '%';
-        }
+        display: true, color: '#ffffff', font: { weight: 'bold', size: 14 },
+        formatter: (value) => sentimentTotal === 0 ? '' : (value / sentimentTotal * 100).toFixed(1) + '%'
       },
       tooltip: {
         callbacks: {
@@ -148,30 +301,21 @@ new Chart(document.getElementById('sentimentChart'), {
   }
 });
 
-// --- Source bar: vertical bars with count labels on top ---
+// --- Source bar ---
 new Chart(document.getElementById('sourceChart'), {
   type: 'bar',
   data: {
     labels: ["play_store", "app_store", "youtube"],
     datasets: [{
-      label: 'Reviews',
-      data: [207, 122, 52],
-      backgroundColor: '#3b82f6',
-      borderRadius: 4
+      label: 'Reviews', data: [207, 122, 52],
+      backgroundColor: '#3b82f6', borderRadius: 4
     }]
   },
   options: {
-    responsive: true,
-    maintainAspectRatio: false,
+    responsive: true, maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
-      datalabels: {
-        display: true,
-        anchor: 'end',
-        align: 'end',
-        color: '#1e293b',
-        font: { weight: 'bold', size: 12 }
-      }
+      datalabels: { display: true, anchor: 'end', align: 'end', color: '#1e293b', font: { weight: 'bold', size: 12 } }
     },
     scales: {
       x: { title: { display: true, text: 'Source', font: { size: 13, weight: 'bold' } }, grid: { display: false } },
@@ -180,68 +324,50 @@ new Chart(document.getElementById('sourceChart'), {
   }
 });
 
-// --- Topics horizontal bar: count labels at end of bar ---
+// --- Topics: stacked horizontal bar by sentiment ---
 new Chart(document.getElementById('topicsChart'), {
   type: 'bar',
   data: {
-    labels: ["other", "app_connectivity", "setup", "accuracy", "find_my_device", "customer_service", "compatibility", "price", "build_quality", "range"],
-    datasets: [{
-      label: 'Mentions',
-      data: [176, 132, 110, 55, 41, 35, 23, 12, 12, 8],
-      backgroundColor: '#8b5cf6',
-      borderRadius: 4
-    }]
+    labels: ["app_connectivity", "setup", "accuracy", "find_my_device", "customer_service", "compatibility", "price", "build_quality", "range", "battery", "community_find", "service", "connection", "long term review", "other"],
+    datasets: [
+      { label: 'Negative', data: [78, 73, 39, 7, 31, 11, 7, 3, 3, 6, 1, 0, 1, 0, 20], backgroundColor: '#ef4444', borderRadius: 2 },
+      { label: 'Neutral',  data: [13, 5, 4, 8, 1, 9, 2, 0, 1, 0, 0, 0, 0, 1, 120], backgroundColor: '#94a3b8', borderRadius: 2 },
+      { label: 'Positive', data: [41, 32, 12, 26, 3, 3, 3, 9, 4, 1, 1, 1, 0, 0, 36], backgroundColor: '#10b981', borderRadius: 2 }
+    ]
   },
   options: {
-    indexAxis: 'y',
-    responsive: true,
-    maintainAspectRatio: false,
+    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
     plugins: {
-      legend: { display: false },
+      legend: { position: 'top', labels: { font: { size: 12 }, boxWidth: 14, padding: 12 } },
       datalabels: {
-        display: true,
-        anchor: 'end',
-        align: 'end',
-        color: '#1e293b',
-        font: { weight: 'bold', size: 12 }
-      }
+        display: (ctx) => ctx.dataset.data[ctx.dataIndex] >= 3,
+        color: '#ffffff', font: { weight: 'bold', size: 11 }
+      },
+      tooltip: { mode: 'index', intersect: false }
     },
     scales: {
-      x: { title: { display: true, text: 'Number of mentions', font: { size: 13, weight: 'bold' } }, beginAtZero: true, ticks: { precision: 0 } },
-      y: { title: { display: true, text: 'Topic', font: { size: 13, weight: 'bold' } }, grid: { display: false } }
+      x: { stacked: true, title: { display: true, text: 'Number of mentions', font: { size: 13, weight: 'bold' } }, beginAtZero: true, ticks: { precision: 0 } },
+      y: { stacked: true, title: { display: true, text: 'Topic', font: { size: 13, weight: 'bold' } }, grid: { display: false } }
     }
   }
 });
 
-// --- Weekly trend line: value above each point ---
+// --- Weekly trend ---
 new Chart(document.getElementById('weeklyChart'), {
   type: 'line',
   data: {
     labels: ["2026-W09", "2026-W10", "2026-W11", "2026-W12", "2026-W13", "2026-W14", "2026-W15", "2026-W16", "2026-W17", "2026-W18", "2026-W19", "2026-W20"],
     datasets: [{
-      label: 'Reviews',
-      data: [13, 10, 9, 13, 13, 9, 8, 12, 15, 13, 8, 7],
-      borderColor: '#3b82f6',
-      backgroundColor: 'rgba(59,130,246,0.1)',
-      fill: true,
-      tension: 0.3,
-      pointRadius: 5,
-      pointBackgroundColor: '#3b82f6'
+      label: 'Reviews', data: [13, 10, 9, 13, 13, 9, 8, 12, 15, 13, 8, 7],
+      borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)',
+      fill: true, tension: 0.3, pointRadius: 5, pointBackgroundColor: '#3b82f6'
     }]
   },
   options: {
-    responsive: true,
-    maintainAspectRatio: false,
+    responsive: true, maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
-      datalabels: {
-        display: true,
-        anchor: 'end',
-        align: 'top',
-        color: '#1e293b',
-        font: { weight: 'bold', size: 11 },
-        offset: 6
-      }
+      datalabels: { display: true, anchor: 'end', align: 'top', color: '#1e293b', font: { weight: 'bold', size: 11 }, offset: 6 }
     },
     scales: {
       x: { title: { display: true, text: 'ISO week', font: { size: 13, weight: 'bold' } }, grid: { display: false } },
