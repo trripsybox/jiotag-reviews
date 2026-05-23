@@ -17,6 +17,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          token: ${{secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -60,7 +62,7 @@ jobs:
               echo "No changes in docs/"
             else
               git commit -m "Refresh dashboard $(date -u +'%Y-%m-%d %H:%M UTC')"
-              git push
+              git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/trripsybox/jiotag-reviews.git HEAD:main
             fi
           else
             echo "docs/ not generated, skipping commit"
