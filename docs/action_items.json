@@ -2,30 +2,30 @@
   "items": [
     {
       "title": "Improve app_connectivity",
-      "rationale": "78% of users experienced issues with app connectivity, which is the most frequently mentioned topic.",
+      "rationale": "79% of users experienced issues with app connectivity, which is the most frequently mentioned problem.",
       "priority": "high"
     },
     {
       "title": "Enhance setup process",
-      "rationale": "73% of users had issues with setup, which is the second most frequently mentioned topic.",
+      "rationale": "75% of users reported difficulties with setting up the JioTag, which is the second most frequently mentioned issue.",
       "priority": "high"
     },
     {
-      "title": "Address customer service concerns",
-      "rationale": "31% of users had negative experiences with customer service, which is a significant concern.",
+      "title": "Address customer_service concerns",
+      "rationale": "31% of users had negative experiences with customer service, indicating a need for improvement.",
       "priority": "high"
     },
     {
       "title": "Optimize battery life",
-      "rationale": "7% of users experienced battery-related issues, which is a common pain point.",
+      "rationale": "6% of users reported issues with battery life, which is a common problem with Bluetooth trackers.",
       "priority": "medium"
     },
     {
-      "title": "Improve accuracy",
-      "rationale": "39% of users experienced issues with accuracy, which is a significant concern despite some positive feedback.",
+      "title": "Investigate accuracy issues",
+      "rationale": "40% of users experienced accuracy problems, which may be due to hardware or software issues.",
       "priority": "medium"
     }
   ],
-  "week": "2026-W21",
-  "generated_at_ist": "18 May 2026, 16:18 IST"
+  "week": "2026-W22",
+  "generated_at_ist": "25 May 2026, 11:53 IST"
 }
