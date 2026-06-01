@@ -1,31 +1,31 @@
 {
   "items": [
     {
-      "title": "Improve app_connectivity",
-      "rationale": "79% of users experienced issues with app connectivity, which is the most frequently mentioned problem.",
+      "title": "Improve App Connectivity",
+      "rationale": "79% of negative reviews mention app connectivity issues, which is the most common complaint.",
       "priority": "high"
     },
     {
-      "title": "Enhance setup process",
-      "rationale": "75% of users reported difficulties with setting up the JioTag, which is the second most frequently mentioned issue.",
+      "title": "Enhance Setup Experience",
+      "rationale": "75% of negative reviews mention setup issues, indicating a significant pain point for users.",
       "priority": "high"
     },
     {
-      "title": "Address customer_service concerns",
-      "rationale": "31% of users had negative experiences with customer service, indicating a need for improvement.",
+      "title": "Address Customer Service Concerns",
+      "rationale": "31% of negative reviews mention poor customer service, which is a major source of frustration.",
       "priority": "high"
     },
     {
-      "title": "Optimize battery life",
-      "rationale": "6% of users reported issues with battery life, which is a common problem with Bluetooth trackers.",
+      "title": "Investigate Battery Life Issues",
+      "rationale": "6% of negative reviews mention battery life concerns, which may be a hidden problem.",
       "priority": "medium"
     },
     {
-      "title": "Investigate accuracy issues",
-      "rationale": "40% of users experienced accuracy problems, which may be due to hardware or software issues.",
+      "title": "Optimize Accuracy Features",
+      "rationale": "40% of negative reviews mention accuracy issues, which can impact user trust in the product.",
       "priority": "medium"
     }
   ],
-  "week": "2026-W22",
-  "generated_at_ist": "25 May 2026, 11:53 IST"
+  "week": "2026-W23",
+  "generated_at_ist": "01 Jun 2026, 14:02 IST"
 }
