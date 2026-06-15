@@ -1,31 +1,31 @@
 {
   "items": [
     {
-      "title": "Improve App Connectivity",
-      "rationale": "79% of reviews mention app connectivity issues, with 43% being positive about the app when it works.",
+      "title": "Improve app_connectivity",
+      "rationale": "84% of users experienced issues with app connectivity, with 43% expressing a positive sentiment towards the feature when it works.",
       "priority": "high"
     },
     {
-      "title": "Enhance Setup Experience",
-      "rationale": "75% of reviews mention setup issues, with 33% being positive about the setup process when it works.",
+      "title": "Enhance setup process",
+      "rationale": "80% of users encountered difficulties with setup, with 37% expressing a positive sentiment towards the feature when it works.",
       "priority": "high"
     },
     {
-      "title": "Address Battery Life Concerns",
-      "rationale": "6% of reviews mention battery life issues, with 1% being positive about battery life.",
+      "title": "Address customer service concerns",
+      "rationale": "36% of users had negative experiences with customer service, indicating a need for improvement.",
+      "priority": "high"
+    },
+    {
+      "title": "Optimize battery life",
+      "rationale": "6% of users expressed dissatisfaction with battery life, indicating a potential area for improvement.",
       "priority": "medium"
     },
     {
-      "title": "Improve Customer Service",
-      "rationale": "31% of reviews mention poor customer service, with only 3% being positive about the service.",
-      "priority": "high"
-    },
-    {
-      "title": "Optimize Accuracy Features",
-      "rationale": "41% of reviews mention accuracy issues, with 13% being positive about the accuracy features.",
+      "title": "Improve compatibility with other devices",
+      "rationale": "16% of users experienced issues with compatibility, with 5% expressing a positive sentiment towards the feature when it works.",
       "priority": "medium"
     }
   ],
-  "week": "2026-W24",
-  "generated_at_ist": "08 Jun 2026, 12:58 IST"
+  "week": "2026-W25",
+  "generated_at_ist": "15 Jun 2026, 14:29 IST"
 }
