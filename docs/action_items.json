@@ -2,30 +2,30 @@
   "items": [
     {
       "title": "Improve app_connectivity",
-      "rationale": "84% of users experienced issues with app connectivity, with 43% expressing a positive sentiment towards the feature when it works.",
+      "rationale": "85% of negative reviews mention issues with app connectivity, which is the most frequently mentioned topic.",
       "priority": "high"
     },
     {
       "title": "Enhance setup process",
-      "rationale": "80% of users encountered difficulties with setup, with 37% expressing a positive sentiment towards the feature when it works.",
+      "rationale": "81% of negative reviews mention difficulties with setup, which is the second most frequently mentioned topic.",
       "priority": "high"
     },
     {
       "title": "Address customer service concerns",
-      "rationale": "36% of users had negative experiences with customer service, indicating a need for improvement.",
+      "rationale": "36% of negative reviews mention poor customer service, which is a significant concern for customers.",
       "priority": "high"
     },
     {
-      "title": "Optimize battery life",
-      "rationale": "6% of users expressed dissatisfaction with battery life, indicating a potential area for improvement.",
+      "title": "Investigate battery life issues",
+      "rationale": "6% of negative reviews mention battery life concerns, which may be a significant pain point for customers.",
       "priority": "medium"
     },
     {
       "title": "Improve compatibility with other devices",
-      "rationale": "16% of users experienced issues with compatibility, with 5% expressing a positive sentiment towards the feature when it works.",
+      "rationale": "16% of negative reviews mention compatibility issues, which may be a concern for customers with specific device configurations.",
       "priority": "medium"
     }
   ],
-  "week": "2026-W25",
-  "generated_at_ist": "15 Jun 2026, 14:29 IST"
+  "week": "2026-W26",
+  "generated_at_ist": "22 Jun 2026, 14:25 IST"
 }
