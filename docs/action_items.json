@@ -2,30 +2,30 @@
   "items": [
     {
       "title": "Improve app_connectivity",
-      "rationale": "85% of negative reviews mention issues with app connectivity, which is the most frequently mentioned topic.",
+      "rationale": "86% of users experienced issues with app connectivity, which is the most frequently mentioned topic.",
       "priority": "high"
     },
     {
       "title": "Enhance setup process",
-      "rationale": "81% of negative reviews mention difficulties with setup, which is the second most frequently mentioned topic.",
+      "rationale": "82% of users had negative experiences with the setup process, indicating a significant pain point.",
       "priority": "high"
     },
     {
-      "title": "Address customer service concerns",
-      "rationale": "36% of negative reviews mention poor customer service, which is a significant concern for customers.",
-      "priority": "high"
-    },
-    {
-      "title": "Investigate battery life issues",
-      "rationale": "6% of negative reviews mention battery life concerns, which may be a significant pain point for customers.",
+      "title": "Address battery life concerns",
+      "rationale": "6% of users mentioned battery life as a negative aspect, which may be a deal-breaker for some customers.",
       "priority": "medium"
     },
     {
-      "title": "Improve compatibility with other devices",
-      "rationale": "16% of negative reviews mention compatibility issues, which may be a concern for customers with specific device configurations.",
+      "title": "Improve customer service",
+      "rationale": "36% of users had negative experiences with customer service, indicating a need for improvement.",
+      "priority": "medium"
+    },
+    {
+      "title": "Investigate accuracy issues",
+      "rationale": "53% of users mentioned accuracy as a negative aspect, which may be a critical feature for some customers.",
       "priority": "medium"
     }
   ],
-  "week": "2026-W26",
-  "generated_at_ist": "22 Jun 2026, 14:25 IST"
+  "week": "2026-W27",
+  "generated_at_ist": "29 Jun 2026, 12:57 IST"
 }
