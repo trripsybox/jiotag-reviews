@@ -1,31 +1,31 @@
 {
   "items": [
     {
-      "title": "Improve App Connectivity",
-      "rationale": "86% of negative reviews mention app connectivity issues, which is the most frequently mentioned topic.",
+      "title": "Improve app_connectivity",
+      "rationale": "86% of users experienced issues with app connectivity, which is the most frequently mentioned topic.",
       "priority": "high"
     },
     {
-      "title": "Enhance Battery Life",
-      "rationale": "7 out of 9 reviews mentioning battery have a negative sentiment, indicating a significant concern.",
-      "priority": "high"
-    },
-    {
-      "title": "Streamline Setup Process",
-      "rationale": "84 out of 90 reviews mentioning setup have a negative sentiment, suggesting a frustrating user experience.",
-      "priority": "high"
-    },
-    {
-      "title": "Improve Customer Service",
-      "rationale": "36 out of 39 reviews mentioning customer service have a negative sentiment, indicating a need for improvement.",
+      "title": "Enhance battery life",
+      "rationale": "7 users out of 505 reported negative experiences with battery life, indicating a potential issue.",
       "priority": "medium"
     },
     {
-      "title": "Optimize Price Point",
-      "rationale": "17 out of 20 reviews mentioning price have a negative sentiment, suggesting a price sensitivity issue.",
+      "title": "Optimize setup process",
+      "rationale": "84 users out of 505 reported negative experiences with the setup process, which is a significant pain point.",
+      "priority": "high"
+    },
+    {
+      "title": "Address customer service concerns",
+      "rationale": "37 users out of 505 reported negative experiences with customer service, indicating a need for improvement.",
+      "priority": "high"
+    },
+    {
+      "title": "Investigate compatibility issues",
+      "rationale": "16 users out of 505 reported negative experiences with compatibility, which may be a significant issue for some users.",
       "priority": "medium"
     }
   ],
-  "week": "2026-W28",
-  "generated_at_ist": "06 Jul 2026, 12:39 IST"
+  "week": "2026-W29",
+  "generated_at_ist": "13 Jul 2026, 11:42 IST"
 }
