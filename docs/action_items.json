@@ -1,31 +1,31 @@
 {
   "items": [
     {
-      "title": "Improve App Connectivity",
-      "rationale": "92% of negative reviews mention app connectivity issues, which is the most frequently mentioned topic.",
+      "title": "Improve app_connectivity",
+      "rationale": "95% of users experienced issues with app connectivity, which is the most frequently mentioned problem.",
       "priority": "high"
     },
     {
-      "title": "Enhance Battery Life",
-      "rationale": "7 out of 9 negative reviews mention battery life issues, indicating a significant pain point.",
+      "title": "Enhance setup process",
+      "rationale": "94% of users had difficulties with the setup process, which is a significant pain point.",
       "priority": "high"
     },
     {
-      "title": "Streamline Setup Process",
-      "rationale": "89 out of 202 reviews mention setup issues, which is a major contributor to negative reviews.",
+      "title": "Address customer service concerns",
+      "rationale": "43% of users had negative experiences with customer service, indicating a need for improvement.",
       "priority": "high"
     },
     {
-      "title": "Improve Customer Service",
-      "rationale": "42 out of 202 reviews mention poor customer service, which is a significant concern.",
+      "title": "Optimize battery life",
+      "rationale": "7% of users experienced battery-related issues, which is a common problem.",
       "priority": "medium"
     },
     {
-      "title": "Optimize Accuracy",
-      "rationale": "53 out of 202 reviews mention accuracy issues, which is a notable concern, especially considering the device's purpose.",
+      "title": "Improve accuracy and range",
+      "rationale": "55% and 11% of users experienced issues with accuracy and range, respectively, which are key features of the product.",
       "priority": "medium"
     }
   ],
-  "week": "2026-W30",
-  "generated_at_ist": "20 Jul 2026, 11:44 IST"
+  "week": "2026-W31",
+  "generated_at_ist": "27 Jul 2026, 11:55 IST"
 }
