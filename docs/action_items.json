@@ -1,31 +1,31 @@
 {
   "items": [
     {
-      "title": "Improve app_connectivity",
-      "rationale": "High negative count (102) and low positive count (50) for app_connectivity, indicating a significant issue with users experiencing difficulties connecting the JioTag to the app.",
+      "title": "Improve App Connectivity",
+      "rationale": "103 negative reviews and 13 neutral reviews indicate significant issues with app connectivity, which is a critical feature for a Bluetooth tracker.",
       "priority": "high"
     },
     {
-      "title": "Enhance customer service",
-      "rationale": "High negative count (45) and low positive count (3) for customer_service, indicating a need for improved support to address user concerns.",
+      "title": "Enhance Customer Service",
+      "rationale": "46 negative reviews and 1 neutral review indicate poor customer service experiences, which can lead to loss of customer trust and loyalty.",
       "priority": "high"
     },
     {
-      "title": "Address setup issues",
-      "rationale": "High negative count (100) and low positive count (51) for setup, indicating a need to simplify and streamline the setup process.",
+      "title": "Address Setup Issues",
+      "rationale": "101 negative reviews and 16 neutral reviews indicate significant difficulties with setting up the JioTag, which can lead to frustration and abandonment.",
       "priority": "high"
     },
     {
-      "title": "Investigate battery life concerns",
-      "rationale": "Moderate negative count (7) and low positive count (1) for battery, indicating a need to improve battery life to meet user expectations.",
+      "title": "Investigate Battery Life Concerns",
+      "rationale": "7 negative reviews and 1 neutral review indicate battery life issues, which can impact user experience and satisfaction.",
       "priority": "medium"
     },
     {
-      "title": "Improve compatibility with other devices",
-      "rationale": "Moderate negative count (16) and low positive count (7) for compatibility, indicating a need to expand compatibility with other devices and platforms.",
+      "title": "Improve Compatibility with Devices",
+      "rationale": "16 negative reviews and 13 neutral reviews indicate compatibility issues with various devices, which can limit the product's appeal and usability.",
       "priority": "medium"
     }
   ],
-  "week": "2026-W32",
-  "generated_at_ist": "03 Aug 2026, 11:48 IST"
+  "week": "2026-W33",
+  "generated_at_ist": "10 Aug 2026, 09:56 IST"
 }
