@@ -1,31 +1,31 @@
 {
   "items": [
     {
-      "title": "Improve App Connectivity",
-      "rationale": "103 negative reviews and 13 neutral reviews indicate significant issues with app connectivity, which is a critical feature for a Bluetooth tracker.",
+      "title": "Improve app_connectivity",
+      "rationale": "110 negative reviews and 53 positive reviews indicate a significant issue with app connectivity, affecting 17% of total reviews.",
       "priority": "high"
     },
     {
-      "title": "Enhance Customer Service",
-      "rationale": "46 negative reviews and 1 neutral review indicate poor customer service experiences, which can lead to loss of customer trust and loyalty.",
+      "title": "Enhance setup process",
+      "rationale": "110 negative reviews and 59 positive reviews suggest that the setup process is a major pain point, impacting 17% of total reviews.",
       "priority": "high"
     },
     {
-      "title": "Address Setup Issues",
-      "rationale": "101 negative reviews and 16 neutral reviews indicate significant difficulties with setting up the JioTag, which can lead to frustration and abandonment.",
+      "title": "Address customer service concerns",
+      "rationale": "47 negative reviews and 3 positive reviews indicate a significant issue with customer service, affecting 7% of total reviews.",
       "priority": "high"
     },
     {
-      "title": "Investigate Battery Life Concerns",
-      "rationale": "7 negative reviews and 1 neutral review indicate battery life issues, which can impact user experience and satisfaction.",
+      "title": "Investigate battery life issues",
+      "rationale": "9 negative reviews and 1 positive review suggest that battery life is a concern, impacting 1.4% of total reviews.",
       "priority": "medium"
     },
     {
-      "title": "Improve Compatibility with Devices",
-      "rationale": "16 negative reviews and 13 neutral reviews indicate compatibility issues with various devices, which can limit the product's appeal and usability.",
+      "title": "Improve accuracy and range",
+      "rationale": "66 negative and 19 positive reviews for accuracy, and 15 negative and 7 positive reviews for range, indicate areas for improvement.",
       "priority": "medium"
     }
   ],
-  "week": "2026-W33",
-  "generated_at_ist": "10 Aug 2026, 09:56 IST"
+  "week": "2026-W34",
+  "generated_at_ist": "17 Aug 2026, 09:15 IST"
 }
